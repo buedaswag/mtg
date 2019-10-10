@@ -271,6 +271,10 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     #minus 1 minute to prevent conflicts with cron
     now_date_time_hour_puls_frequency_min = now_date_time_hour + pd.Timedelta('%d minutes'%(frequency - 1))
     
+    #print db timezone 
+    with get_db_connection().connect() as con:
+        print(con.execute('show timezone;').fetchall()[0])
+    
     query = '''
     SELECT COUNT(*)  
     FROM card_listings
@@ -338,7 +342,13 @@ def main(debug=False):
                 display(df)
         
 if __name__ == '__main__':
+    start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
     main(debug=False)
+    end = pd.Timestamp.now(tz='UTC')
+    print('start: %s'%(start,))
+    print('end: %s'%(end,))
+    print('duration: %s'%(end - start,))
+    
 
 
 # In[8]:

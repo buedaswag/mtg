@@ -54,10 +54,10 @@ https://askubuntu.com/questions/420981/how-do-i-save-terminal-output-to-a-file<b
 crontab -u mig -e
 
 #regular job
-*/30 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/regular_log.txt<br />
+*/30 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/regular_log.txt<br />
 
 #experimental job
-25 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/experimental_log.txt<br />
+25 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/experimental_log.txt<br />
 
 # access remote server, and running graphics applications (browser windows, for example)
 https://askubuntu.com/questions/213678/how-to-install-x11-xorg<br />
@@ -68,3 +68,7 @@ https://unix.stackexchange.com/questions/353258/how-to-run-google-chrome-or-chro
 ssh -X user@hostname<br />
 ssh -X mig@192.168.1.8<br />
 
+# timezone notes
+SET TIME ZONE 'UTC';
+
+use this setting in pandas as well
