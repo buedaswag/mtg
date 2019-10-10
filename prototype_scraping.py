@@ -50,8 +50,8 @@ def load_page(url, card_name, debug = False):
         return html
     
     driver_path = Path(os.path.join(Path().absolute(), 'chromedriver', 'chromedriver'))
-    driver = webdriver.Chrome(driver_path)
-    
+    #driver = webdriver.Chrome(driver_path)
+    driver = webdriver.Chrome('/usr/bin/chromedriver')
     #options = webdriver.ChromeOptions()
     #options.binary_location = '/opt/google/chrome/google-chrome'
     #service_log_path = "{}/chromedriver.log".format(logs_path)
@@ -237,49 +237,7 @@ def get_data(row_tags, card_name, debug=False):
 
 
 ''' 
-psql [database_name] [user_name]
-https://www.freecodecamp.org/news/how-to-get-started-with-postgresql-9d3bc1dd1b11/
-
-CREATE DATABASE mtg;
-
-sudo su - postgres 
-psql
-create database mtg;
-\l # list databases, then press q to go back to db console
-
-\q # to exit:
-
-\dt # list tables of the public schema
-
-CREATE TABLE card_listings (
-  card_name varchar(100), 
-  ts timestamp, 
-  list_order int, 
-  seller_name varchar(30), 
-  seller_sales int, 
-  seller_available_items int, 
-  item_price int, 
-  item_amount int, 
-  item_location varchar(30), 
-  item_condition char(2), 
-  item_language varchar(20),  
-  item_is_playset boolean, 
-  item_is_foil boolean,
-  PRIMARY KEY (card_name, ts, list_order)
-);
-
-GRANT ALL PRIVILEGES ON DATABASE mtg to mig;
-
-GRANT CONNECT ON DATABASE mtg TO mig;
-GRANT USAGE ON SCHEMA public TO mig;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mig;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mig;
-
-GRANT USAGE ON SCHEMA public TO mig;
-GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO mig;
-
-0/30 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py
-
+bitconnect to the database 
 '''
 def get_db_connection():
     username = 'mig'
@@ -391,7 +349,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[9]:
+# In[10]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
