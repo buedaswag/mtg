@@ -21,6 +21,9 @@ import pickle
 import os
 from pathlib import Path
 from psycopg2.errors import UndefinedTable
+from webdriver_manager.chrome import ChromeDriverManager
+
+driver = webdriver.Chrome(ChromeDriverManager().install())
 
 
 # In[2]:
@@ -46,8 +49,9 @@ def load_page(url, card_name, debug = False):
             html = pickle.load(file)
         return html
     
-    driver_path = Path(os.path.join(Path().absolute(), 'project_mtg', 'selenium_drivers', 'chromedriver'))
-    driver = webdriver.Chrome(driver_path)
+    driver_path = Path(os.path.join(Path().absolute(), 'selenium_drivers', 'chromedriver'))
+    #driver = webdriver.Chrome(driver_path)
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(url)
     delay = 2
     timeout = 0
@@ -204,7 +208,7 @@ def get_data(row_tags, card_name, debug=False):
     '''
     df.loc[df.item_is_playset == True, 'item_price'] =         df.loc[df.item_is_playset == True, 'item_price'] / 4
     df.loc[df.item_is_playset == True, 'item_amount'] =         df.loc[df.item_is_playset == True, 'item_amount'] * 4
-    '''
+
     if debug == True:
         display('seller_names', len(seller_names), seller_names[:10], 
             'item_prices', len(item_prices), item_prices[:10], 
@@ -216,7 +220,6 @@ def get_data(row_tags, card_name, debug=False):
             'item_is_foils', len(item_is_foils), 'True: %d, False: %d'%(len([i for i in item_is_foils if item_is_foils[i]==True]), len([i for i in item_is_foils if item_is_foils[i]==False])))
         with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
             display(df)
-    '''
     return df
 
 
@@ -226,9 +229,7 @@ def get_data(row_tags, card_name, debug=False):
 ''' 
 CREATE DATABASE
 
-sudo su - postgres mtg
-connect to db:
-\c mtg
+sudo su - postgres 
 psql
 create database mtg;
 \l # list databases, then press q to go back to db console
@@ -239,7 +240,7 @@ create database mtg;
 
 CREATE TABLE card_listings (
   card_name varchar(100), 
-  ts timestamptz, 
+  ts timestamp, 
   list_order int, 
   seller_name varchar(30), 
   seller_sales int, 
@@ -278,14 +279,30 @@ def get_db_connection():
 # In[6]:
 
 
-def conditional_insert(engine, card_name, frequency=30):
+now = pd.Timestamp.now() #Timestamp('2019-10-09 15:09:44.173350+0000')
+minute = 0 if now.minute < 30 else 30
+minute
+
+
+# In[7]:
+
+
+def conditional_insert(engine, card_name, frequency=30, debug = False):
     '''
-    inserts records in the database
+    Checks if its time to insert records in the database.
+    We only want to insert records with a frequency of frequency.
+    
+    engine - the db engine
+    card_name - the card name
+    frequency - the frequency of db inserts
     '''
     
-    now = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000', tz='UTC')
-    now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour)
-    now_date_time_hour_puls_frequency_min = now_date_time_hour + pd.Timedelta('%d minutes'%frequency)
+    now = pd.Timestamp.now() #Timestamp('2019-10-09 15:09:44.173350+0000')
+    minute = 0 if now.minute < 30 else 30
+    now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
+    
+    #minus 1 minute to prevent conflicts with cron
+    now_date_time_hour_puls_frequency_min = now_date_time_hour + pd.Timedelta('%d minutes'%(frequency - 1))
     
     query = '''
     SELECT COUNT(*)  
@@ -294,21 +311,28 @@ def conditional_insert(engine, card_name, frequency=30):
     AND ts::time BETWEEN '%s' AND '%s';
     '''%(card_name, now_date_time_hour, now_date_time_hour_puls_frequency_min)
     
-    is_time_to_insert = False
-    try:
-        df_result = pd.read_sql_query(query, engine)
-    except UndefinedTable:
-        #table does not exist, goot to insert
-        is_time_to_insert = True
-
+    df_result = pd.read_sql_query(query, engine)
+    
+    if debug==True:
+        print(query)
+    
     return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency_min
 
 
-# In[7]:
+# In[8]:
+
+
+14.5*2*24*31
+
+
+# In[9]:
 
 
 def main(debug=False):
-    
+    '''
+    the 6 debug files have 14.5 MB total
+    14.5MB x 2 times per hour x 24 hours x 31 days = 21576 GB per month
+    '''
     
     '''
     card_names and links
@@ -335,10 +359,13 @@ def main(debug=False):
             continue
         
         url = card_names_urls[card_name]
-        html = load_page(url, card_name, debug=True)
+        html = load_page(url, card_name, debug=debug)
         info, table = get_soup(html)
         row_tags = table.find_all('div', class_='row no-gutters article-row')
         df = get_data(row_tags, card_name)
+        
+        print('inserting records of card %s with shape %s'%(card_name, str(df.shape)))
+        
         df.to_sql('card_listings', con=engine, if_exists='append', index=False)
         
         if debug == True:
@@ -346,8 +373,15 @@ def main(debug=False):
             print(card_names_urls[card_name])
             print(df.shape)
             print(df.dtypes)
-            #with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
-                #display(df)
+            with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+                display(df)
         
 if __name__ == '__main__':
     main(debug=False)
+
+
+# In[12]:
+
+
+get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
+
