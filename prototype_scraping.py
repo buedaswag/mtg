@@ -254,14 +254,6 @@ def get_db_connection():
 # In[6]:
 
 
-now = pd.Timestamp.now() #Timestamp('2019-10-09 15:09:44.173350+0000')
-minute = 0 if now.minute < 30 else 30
-minute
-
-
-# In[7]:
-
-
 def conditional_insert(engine, card_name, frequency=30, debug = False):
     '''
     Checks if its time to insert records in the database.
@@ -272,7 +264,7 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     frequency - the frequency of db inserts
     '''
     
-    now = pd.Timestamp.now() #Timestamp('2019-10-09 15:09:44.173350+0000')
+    now = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')
     minute = 0 if now.minute < 30 else 30
     now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
     
@@ -294,7 +286,7 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency_min
 
 
-# In[8]:
+# In[7]:
 
 
 def main(debug=False):
@@ -349,7 +341,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[9]:
+# In[8]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
