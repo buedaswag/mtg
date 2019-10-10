@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC 
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementNotInteractableException, ElementClickInterceptedException
+from selenium.webdriver.chrome.options import Options
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -22,11 +23,10 @@ import os
 from pathlib import Path
 from psycopg2.errors import UndefinedTable
 from webdriver_manager.chrome import ChromeDriverManager
+from pyvirtualdisplay import Display
 
-driver = webdriver.Chrome(ChromeDriverManager().install())
 
-
-# In[2]:
+# In[10]:
 
 
 class TimeLimitExpired(Exception):
@@ -49,7 +49,7 @@ def load_page(url, card_name, debug = False):
             html = pickle.load(file)
         return html
     
-    driver_path = Path(os.path.join(Path().absolute(), 'selenium_drivers', 'chromedriver'))
+    #driver_path = Path(os.path.join(Path().absolute(), 'selenium_drivers', 'chromedriver'))
     #driver = webdriver.Chrome(driver_path)
     driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(url)
@@ -78,10 +78,9 @@ def load_page(url, card_name, debug = False):
         if pickle_file.is_file() == False:
             with open(pickle_file, 'wb') as file:
                 pickle.dump(html, file, protocol=pickle.HIGHEST_PROTOCOL)
-            
     finally:
         driver.quit()
-        
+            
     return html
 
 
@@ -319,13 +318,7 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency_min
 
 
-# In[8]:
-
-
-14.5*2*24*31
-
-
-# In[9]:
+# In[12]:
 
 
 def main(debug=False):
@@ -380,7 +373,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[12]:
+# In[ ]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
