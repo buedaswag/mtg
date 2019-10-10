@@ -49,8 +49,8 @@ def load_page(url, card_name, debug = False):
             html = pickle.load(file)
         return html
     
-    logs_path = Path(os.path.join(Path().absolute(), 'logs', 'chromedriver'))
-    #driver = webdriver.Chrome(driver_path)
+    driver_path = Path(os.path.join(Path().absolute(), 'chromedriver', 'chromedriver'))
+    driver = webdriver.Chrome(driver_path)
     
     #options = webdriver.ChromeOptions()
     #options.binary_location = '/opt/google/chrome/google-chrome'
@@ -60,8 +60,9 @@ def load_page(url, card_name, debug = False):
     #        chrome_options=options)#,
             #service_args=service_args,
             #service_log_path=service_log_path)
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    #driver = webdriver.Chrome(ChromeDriverManager().install())
     #driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+    #driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(url)
     delay = 2
     timeout = 0

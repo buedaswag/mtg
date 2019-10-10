@@ -1,7 +1,10 @@
 # mtg
 mtg card price visualization project
 
-#postgres notes
+# postgres notes
+psql [database_name] [user_name]<br />
+https://www.freecodecamp.org/news/how-to-get-started-with-postgresql-9d3bc1dd1b11/<br />
+
 CREATE DATABASE mtg;<br />
 
 sudo su - postgres <br />
@@ -42,5 +45,26 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mig;<br />
 GRANT USAGE ON SCHEMA public TO mig; <br />
 GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO mig;<br />
 
-#cron notes
-0/30 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py<br />
+# cron notes
+
+https://askubuntu.com/questions/420981/how-do-i-save-terminal-output-to-a-file<br />
+
+https://askubuntu.com/questions/420981/how-do-i-save-terminal-output-to-a-file<br />
+
+crontab -u mig -e
+
+#regular job
+*/30 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/regular_log.txt<br />
+
+#experimental job
+25 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/experimental_log.txt<br />
+
+# access remote server, and running graphics applications (browser windows, for example)
+https://askubuntu.com/questions/213678/how-to-install-x11-xorg<br />
+
+https://unix.stackexchange.com/questions/353258/how-to-run-google-chrome-or-chromium-on-a-remote-ssh-session<br />
+
+
+ssh -X user@hostname<br />
+ssh -X mig@192.168.1.8<br />
+
