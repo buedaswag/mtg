@@ -22,10 +22,11 @@ import pickle
 import os
 from pathlib import Path
 from psycopg2.errors import UndefinedTable
-from webdriver_manager.chrome import ChromeDriverManager
+#from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 
-# In[9]:
+# In[2]:
 
 
 class TimeLimitExpired(Exception):
@@ -51,15 +52,16 @@ def load_page(url, card_name, debug = False):
     logs_path = Path(os.path.join(Path().absolute(), 'logs', 'chromedriver'))
     #driver = webdriver.Chrome(driver_path)
     
-    options = webdriver.ChromeOptions()
-    options.binary_location = '/opt/google/chrome/google-chrome'
+    #options = webdriver.ChromeOptions()
+    #options.binary_location = '/opt/google/chrome/google-chrome'
     #service_log_path = "{}/chromedriver.log".format(logs_path)
     #service_args = ['--verbose']
-    driver = webdriver.Chrome(ChromeDriverManager().install(), #'/path/to/chromedriver',
-            chrome_options=options)#,
+    #driver = webdriver.Chrome(ChromeDriverManager().install(), #'/path/to/chromedriver',
+    #        chrome_options=options)#,
             #service_args=service_args,
             #service_log_path=service_log_path)
     #driver = webdriver.Chrome(ChromeDriverManager().install())
+    driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
     driver.get(url)
     delay = 2
     timeout = 0
@@ -234,6 +236,9 @@ def get_data(row_tags, card_name, debug=False):
 
 
 ''' 
+psql [database_name] [user_name]
+https://www.freecodecamp.org/news/how-to-get-started-with-postgresql-9d3bc1dd1b11/
+
 CREATE DATABASE mtg;
 
 sudo su - postgres 
@@ -330,7 +335,7 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency_min
 
 
-# In[10]:
+# In[8]:
 
 
 def main(debug=False):
@@ -385,7 +390,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[11]:
+# In[ ]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
