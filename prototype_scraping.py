@@ -23,7 +23,6 @@ import os
 from pathlib import Path
 from psycopg2.errors import UndefinedTable
 from webdriver_manager.chrome import ChromeDriverManager
-from pyvirtualdisplay import Display
 
 
 # In[9]:
@@ -235,7 +234,7 @@ def get_data(row_tags, card_name, debug=False):
 
 
 ''' 
-CREATE DATABASE
+CREATE DATABASE mtg;
 
 sudo su - postgres 
 psql
@@ -263,13 +262,17 @@ CREATE TABLE card_listings (
   PRIMARY KEY (card_name, ts, list_order)
 );
 
+GRANT ALL PRIVILEGES ON DATABASE mtg to mig;
 
-  ID INT REFERENCES Artists(ID),
-  BID INT REFERENCES Bands(BID),
-  NAME CHAR(40) NOT NULL,
-  DATE_JOIN date,
-  PRIMARY KEY (ID, BID)
-);
+GRANT CONNECT ON DATABASE mtg TO mig;
+GRANT USAGE ON SCHEMA public TO mig;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mig;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mig;
+
+GRANT USAGE ON SCHEMA public TO mig;
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO mig;
+
+0/30 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py
 
 '''
 def get_db_connection():
@@ -382,7 +385,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[ ]:
+# In[11]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')

@@ -30,6 +30,8 @@ CREATE TABLE card_listings (<br />
   PRIMARY KEY (card_name, ts, list_order)<br />
 );<br />
 
+create user mig with password 'password';<br />
+
 GRANT ALL PRIVILEGES ON DATABASE mtg to mig;<br />
 
 GRANT CONNECT ON DATABASE mtg TO mig;<br />
