@@ -22,8 +22,8 @@ import pickle
 import os
 from pathlib import Path
 from psycopg2.errors import UndefinedTable
-#from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
+#from webdriver_manager.firefox import GeckoDriverManager
 
 
 # In[2]:
@@ -60,8 +60,8 @@ def load_page(url, card_name, debug = False):
     #        chrome_options=options)#,
             #service_args=service_args,
             #service_log_path=service_log_path)
-    #driver = webdriver.Chrome(ChromeDriverManager().install())
-    driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+    driver = webdriver.Chrome(ChromeDriverManager().install())
+    #driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
     driver.get(url)
     delay = 2
     timeout = 0
@@ -390,7 +390,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[ ]:
+# In[9]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
