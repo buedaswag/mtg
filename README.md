@@ -2,43 +2,43 @@
 mtg card price visualization project
 
 #postgres notes
-CREATE DATABASE mtg;
+CREATE DATABASE mtg;<br />
 
-sudo su - postgres 
-psql
-create database mtg;
-\l # list databases, then press q to go back to db console
+sudo su - postgres <br />
+psql<br />
+create database mtg;<br />
+\l # list databases, then press q to go back to db console<br />
 
-\q # to exit:
+\q # to exit:<br />
 
-\dt # list tables of the public schema
+\dt # list tables of the public schema<br />
 
-CREATE TABLE card_listings (
-  card_name varchar(100), 
-  ts timestamp, 
-  list_order int, 
-  seller_name varchar(30), 
-  seller_sales int, 
-  seller_available_items int, 
-  item_price int, 
-  item_amount int, 
-  item_location varchar(30), 
-  item_condition char(2), 
-  item_language varchar(20),  
-  item_is_playset boolean, 
-  item_is_foil boolean,
-  PRIMARY KEY (card_name, ts, list_order)
-);
+CREATE TABLE card_listings (<br />
+  card_name varchar(100), <br />
+  ts timestamp, <br />
+  list_order int, <br />
+  seller_name varchar(30), <br />
+  seller_sales int, <br />
+  seller_available_items int, <br />
+  item_price int, <br />
+  item_amount int, <br />
+  item_location varchar(30), <br />
+  item_condition char(2), <br />
+  item_language varchar(20),  <br />
+  item_is_playset boolean, <br />
+  item_is_foil boolean,<br />
+  PRIMARY KEY (card_name, ts, list_order)<br />
+);<br />
 
-GRANT ALL PRIVILEGES ON DATABASE mtg to mig;
+GRANT ALL PRIVILEGES ON DATABASE mtg to mig;<br />
 
-GRANT CONNECT ON DATABASE mtg TO mig;
-GRANT USAGE ON SCHEMA public TO mig;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mig;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mig;
+GRANT CONNECT ON DATABASE mtg TO mig;<br />
+GRANT USAGE ON SCHEMA public TO mig;<br />
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO mig;<br />
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mig;<br />
 
-GRANT USAGE ON SCHEMA public TO mig;
-GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO mig;
+GRANT USAGE ON SCHEMA public TO mig; <br />
+GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO mig;<br />
 
 #cron notes
-0/30 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py
+0/30 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py<br />
