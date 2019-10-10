@@ -26,7 +26,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from pyvirtualdisplay import Display
 
 
-# In[10]:
+# In[9]:
 
 
 class TimeLimitExpired(Exception):
@@ -49,17 +49,17 @@ def load_page(url, card_name, debug = False):
             html = pickle.load(file)
         return html
     
-    #driver_path = Path(os.path.join(Path().absolute(), 'selenium_drivers', 'chromedriver'))
+    logs_path = Path(os.path.join(Path().absolute(), 'logs', 'chromedriver'))
     #driver = webdriver.Chrome(driver_path)
     
     options = webdriver.ChromeOptions()
     options.binary_location = '/opt/google/chrome/google-chrome'
-    service_log_path = "{}/chromedriver.log".format(outputdir)
-    service_args = ['--verbose']
+    #service_log_path = "{}/chromedriver.log".format(logs_path)
+    #service_args = ['--verbose']
     driver = webdriver.Chrome(ChromeDriverManager().install(), #'/path/to/chromedriver',
-            chrome_options=options,
-            service_args=service_args,
-            service_log_path=service_log_path)
+            chrome_options=options)#,
+            #service_args=service_args,
+            #service_log_path=service_log_path)
     #driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(url)
     delay = 2
@@ -327,7 +327,7 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency_min
 
 
-# In[12]:
+# In[10]:
 
 
 def main(debug=False):
@@ -382,7 +382,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[13]:
+# In[ ]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
