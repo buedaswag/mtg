@@ -51,7 +51,16 @@ def load_page(url, card_name, debug = False):
     
     #driver_path = Path(os.path.join(Path().absolute(), 'selenium_drivers', 'chromedriver'))
     #driver = webdriver.Chrome(driver_path)
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    
+    options = webdriver.ChromeOptions()
+    options.binary_location = '/opt/google/chrome/google-chrome'
+    service_log_path = "{}/chromedriver.log".format(outputdir)
+    service_args = ['--verbose']
+    driver = webdriver.Chrome(ChromeDriverManager().install(), #'/path/to/chromedriver',
+            chrome_options=options,
+            service_args=service_args,
+            service_log_path=service_log_path)
+    #driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(url)
     delay = 2
     timeout = 0
@@ -373,7 +382,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[ ]:
+# In[13]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
