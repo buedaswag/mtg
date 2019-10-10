@@ -3,12 +3,14 @@ mtg card price visualization project
 
 # postgres notes
 psql [database_name] [user_name]<br />
+psql mtg mig<br />
 https://www.freecodecamp.org/news/how-to-get-started-with-postgresql-9d3bc1dd1b11/<br />
 
 CREATE DATABASE mtg;<br />
 
 sudo su - postgres <br />
 psql<br />
+\c DBNAME<br />
 create database mtg;<br />
 \l # list databases, then press q to go back to db console<br />
 
@@ -70,5 +72,7 @@ ssh -X mig@192.168.1.8<br />
 
 # timezone notes
 SET TIME ZONE 'UTC';
+select now();
+show timezone;
 
 use this setting in pandas as well
