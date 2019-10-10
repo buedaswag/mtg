@@ -333,7 +333,7 @@ def main(debug=False):
         row_tags = table.find_all('div', class_='row no-gutters article-row')
         df = get_data(row_tags, card_name)
         
-        print('inserting records of card %s with shape %s'%(card_name, str(df.shape)))
+        print('inserting records of card %s with shape %s regarding time period between %s and %s'%(card_name, str(df.shape), str(start), str(end)))
         
         df.to_sql('card_listings', con=engine, if_exists='append', index=False)
         
@@ -349,7 +349,7 @@ if __name__ == '__main__':
     main(debug=False)
 
 
-# In[10]:
+# In[9]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
