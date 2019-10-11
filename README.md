@@ -25,7 +25,7 @@ CREATE TABLE card_listings (<br />
   seller_name varchar(30), <br />
   seller_sales int, <br />
   seller_available_items int, <br />
-  item_price int, <br />
+  item_price real, <br />
   item_amount int, <br />
   item_location varchar(30), <br />
   item_condition char(2), <br />
@@ -61,7 +61,7 @@ crontab -u mig -e
 #experimental job
 25 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/experimental_log.txt<br />
 
-# access remote server, and running graphics applications (browser windows, for example)
+# SSH access remote server, and running graphics applications (browser windows, for example)
 https://askubuntu.com/questions/213678/how-to-install-x11-xorg<br />
 
 https://unix.stackexchange.com/questions/353258/how-to-run-google-chrome-or-chromium-on-a-remote-ssh-session<br />
@@ -71,8 +71,28 @@ ssh -X user@hostname<br />
 ssh -X mig@192.168.1.8<br />
 
 # timezone notes
-SET TIME ZONE 'UTC';
-select now();
-show timezone;
 
-use this setting in pandas as well
+https://serverfault.com/questions/554359/postgresql-timezone-does-not-match-system-timezone<br />
+The solution for your case is quite simple, just change the TimeZone setting on postgresql.conf to the value you want:<br />
+
+TimeZone = 'Europe/Vienna'<br />
+
+After that you need to reload the service:<br />
+
+sudo su - postgres -c "psql mtg -c 'SELECT pg_reload_conf()'"
+
+https://stackoverflow.com/questions/3602450/where-are-my-postgres-conf-files<br />
+ask your database:<br />
+$ psql -U postgres -c 'SHOW config_file'<br />
+
+
+SET TIME ZONE 'UTC';<br />
+select now();<br />
+show timezone;<br />
+
+use this setting in pandas as well (UTC)<br />
+
+
+
+ALTER TABLE card_listings <br />
+ALTER COLUMN item_price TYPE real; <br />

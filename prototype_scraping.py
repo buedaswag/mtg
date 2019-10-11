@@ -142,7 +142,7 @@ def get_product_information(row_tag):
             item_is_foil = True
     return item_conditions, item_languages, item_is_playset, item_is_foil
 
-def get_data(row_tags, card_name, debug=False):
+def get_data(row_tags, card_name, now, debug=False):
     '''
     iterate through each row in the table, getting the data
     '''
@@ -182,7 +182,7 @@ def get_data(row_tags, card_name, debug=False):
     '''
     data_dict = {
         'card_name': [card_name for i in range(len(seller_names))],
-        'ts': [pd.Timestamp.now(tz='UTC') for i in range(len(seller_names))],
+        'ts': [now for i in range(len(seller_names))],
         'list_order': [i for i in range(len(seller_names))], 
         'seller_name': seller_names,
         'seller_sales': seller_sales,
@@ -271,10 +271,9 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     #minus 1 minute to prevent conflicts with cron
     now_date_time_hour_puls_frequency_min = now_date_time_hour + pd.Timedelta('%d minutes'%(frequency - 1))
     
-    #print db timezone 
-    with get_db_connection().connect() as con:
-        print(con.execute('show timezone;').fetchall()[0])
-    
+    with engine.connect() as conn:
+        print('timezone: %s' % (conn.execute('show timezone;').fetchall()[0],))
+
     query = '''
     SELECT COUNT(*)  
     FROM card_listings
@@ -293,7 +292,7 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
 # In[7]:
 
 
-def main(debug=False):
+def main(engine, debug=False):
     '''
     the 6 debug files have 14.5 MB total
     14.5MB x 2 times per hour x 24 hours x 31 days = 21576 GB per month
@@ -311,25 +310,23 @@ def main(debug=False):
         'Oko, Thief of Crowns': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Oko-Thief-of-Crowns'
     }
     
-    engine = get_db_connection()
-    
     for card_name in card_names_urls:  
         
         '''
         checks if its time to insert data for this card, and skips it if its not
         '''
-        count, start, end = conditional_insert(engine, card_name, frequency=30)
+        count, now, now_plus_frequency = conditional_insert(engine, card_name, frequency=30)
         if count > 0:
-            print('There are already %d records from %s to %s'%(count, start, end))
+            print('There are already %d records from %s to %s'%(count, now, now_plus_frequency))
             continue
         
         url = card_names_urls[card_name]
         html = load_page(url, card_name, debug=debug)
         info, table = get_soup(html)
         row_tags = table.find_all('div', class_='row no-gutters article-row')
-        df = get_data(row_tags, card_name)
+        df = get_data(row_tags, card_name, now)
         
-        print('inserting records of card %s with shape %s regarding time period between %s and %s'%(card_name, str(df.shape), str(start), str(end)))
+        print('inserting records of card %s with shape %s regarding time period between %s and %s'%(card_name, str(df.shape), str(now), str(now_plus_frequency)))
         
         df.to_sql('card_listings', con=engine, if_exists='append', index=False)
         
@@ -342,12 +339,16 @@ def main(debug=False):
                 display(df)
         
 if __name__ == '__main__':
-    start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
-    main(debug=False)
-    end = pd.Timestamp.now(tz='UTC')
-    print('start: %s'%(start,))
-    print('end: %s'%(end,))
-    print('duration: %s'%(end - start,))
+    try: 
+        start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
+        engine = get_db_connection()
+        main(engine, debug=False)
+        end = pd.Timestamp.now(tz='UTC')
+        print('start: %s'%(start,))
+        print('end: %s'%(end,))
+        print('duration: %s'%(end - start,))
+    finally:
+        engine.dispose()
     
 
 
