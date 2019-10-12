@@ -142,7 +142,7 @@ def get_product_information(row_tag):
             item_is_foil = True
     return item_conditions, item_languages, item_is_playset, item_is_foil
 
-def get_data(row_tags, card_name, now, debug=False):
+def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     '''
     iterate through each row in the table, getting the data
     '''
@@ -219,7 +219,7 @@ def get_data(row_tags, card_name, now, debug=False):
     df.loc[df.item_is_playset == True, 'item_price'] =         df.loc[df.item_is_playset == True, 'item_price'] / 4
     df.loc[df.item_is_playset == True, 'item_amount'] =         df.loc[df.item_is_playset == True, 'item_amount'] * 4
 
-    if debug == True:
+    if debug_hard == True:
         display('seller_names', len(seller_names), seller_names[:10], 
             'item_prices', len(item_prices), item_prices[:10], 
             'item_amounts', len(item_amounts), item_amounts[:10], 
@@ -290,7 +290,7 @@ def conditional_insert(engine, card_name, debug = False):
 # In[7]:
 
 
-def main(engine, debug=False):
+def main(engine, debug=False, debug_hard=False):
     '''
     the 6 debug files have 14.5 MB total
     14.5MB x 2 times per hour x 24 hours x 31 days = 21576 GB per month
@@ -324,7 +324,7 @@ def main(engine, debug=False):
         row_tags = table.find_all('div', class_='row no-gutters article-row')
         df = get_data(row_tags, card_name, now)
         
-        print('inserting records of card %s with shape %s regarding time period between %s and %s'%(card_name, str(df.shape), str(now), str(now_plus_frequency)))
+        print('inserting records of card %s with shape %s at %s'%(card_name, str(df.shape), str(now)))
         
         df.to_sql('card_listings', con=engine, if_exists='append', index=False)
         
@@ -333,6 +333,7 @@ def main(engine, debug=False):
             print(card_names_urls[card_name])
             print(df.shape)
             print(df.dtypes)
+        if debug_hard == True:
             with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
                 display(df)
         
@@ -341,7 +342,7 @@ if __name__ == '__main__':
         start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
         engine = get_db_connection()
         
-        main(engine, debug=True)
+        main(engine, debug=False)
         
         end = pd.Timestamp.now(tz='UTC')
         print('start: %s'%(start,))
@@ -352,7 +353,7 @@ if __name__ == '__main__':
     
 
 
-# In[ ]:
+# In[8]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
