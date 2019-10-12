@@ -289,7 +289,7 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency
 
 
-# In[7]:
+# In[8]:
 
 
 def main(engine, debug=False):
@@ -315,7 +315,7 @@ def main(engine, debug=False):
         '''
         checks if its time to insert data for this card, and skips it if its not
         '''
-        count, now, now_plus_frequency = conditional_insert(engine, card_name, frequency=30)
+        count, now, now_plus_frequency = conditional_insert(engine, card_name, frequency=30, debug=debug)
         if count > 0:
             print('There are already %d records from %s to %s'%(count, now, now_plus_frequency))
             continue
@@ -354,7 +354,7 @@ if __name__ == '__main__':
     
 
 
-# In[10]:
+# In[ ]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
