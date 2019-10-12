@@ -66,9 +66,29 @@ https://askubuntu.com/questions/213678/how-to-install-x11-xorg<br />
 
 https://unix.stackexchange.com/questions/353258/how-to-run-google-chrome-or-chromium-on-a-remote-ssh-session<br />
 
+do this on mig-pc: <br />
+~/.ssh/config<br />
+Host mig-server<br />
+    HostName mtgdata.ml<br />
+    User mig<br />
+    Port 49000<br />
 
-ssh -X user@hostname<br />
-ssh -X mig@192.168.1.8<br />
+do this on mig-server:<br />
+https://pt.godaddy.com/help/alterar-a-porta-ssh-para-o-seu-servidor-com-o-linux-7306<br />
+
+
+ssh -X -p 49000 user@hostname<br />
+ssh -X -p 49000 mig@192.168.1.8<br />
+ssh -X -p 49000 mig@mtgdata.ml
+ssh -X -p 49000 mig@79.168.14.53
+
+check if port is open or closed:
+nmap -p 49000 79.168.14.53
+nmap -p 49000 mtgdata.ml
+
+allow connections on specific port:
+sudo ufw allow 49000
+
 
 # timezone notes
 
