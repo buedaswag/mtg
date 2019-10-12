@@ -269,7 +269,7 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
     
     #minus 1 minute to prevent conflicts with cron
-    now_date_time_hour_puls_frequency_min = now_date_time_hour + pd.Timedelta('%d minutes'%(frequency - 1))
+    now_date_time_hour_puls_frequency = now_date_time_hour + pd.Timedelta('%d minutes'%(frequency - 1))
     
     with engine.connect() as conn:
         print('timezone: %s' % (conn.execute('show timezone;').fetchall()[0],))
@@ -279,14 +279,14 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     FROM card_listings
     WHERE card_name = '%s' 
     AND ts::time BETWEEN '%s' AND '%s';
-    '''%(card_name, now_date_time_hour, now_date_time_hour_puls_frequency_min)
+    '''%(card_name, now_date_time_hour, now_date_time_hour_puls_frequency)
     
     df_result = pd.read_sql_query(query, engine)
     
     if debug==True:
         print(query)
     
-    return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency_min
+    return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency
 
 
 # In[7]:
@@ -342,7 +342,9 @@ if __name__ == '__main__':
     try: 
         start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
         engine = get_db_connection()
-        main(engine, debug=False)
+        
+        main(engine, debug=True)
+        
         end = pd.Timestamp.now(tz='UTC')
         print('start: %s'%(start,))
         print('end: %s'%(end,))
@@ -352,7 +354,7 @@ if __name__ == '__main__':
     
 
 
-# In[8]:
+# In[10]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
