@@ -254,7 +254,7 @@ def get_db_connection():
 # In[6]:
 
 
-def conditional_insert(engine, card_name, frequency=30, debug = False):
+def conditional_insert(engine, card_name, debug = False):
     '''
     Checks if its time to insert records in the database.
     We only want to insert records with a frequency of frequency.
@@ -268,9 +268,6 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     minute = 0 if now.minute < 30 else 30
     now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
     
-    #minus 1 minute to prevent conflicts with cron
-    now_date_time_hour_puls_frequency = now_date_time_hour + pd.Timedelta('%d minutes'%(frequency - 1))
-    
     with engine.connect() as conn:
         print('timezone: %s' % (conn.execute('show timezone;').fetchall()[0],))
 
@@ -278,18 +275,19 @@ def conditional_insert(engine, card_name, frequency=30, debug = False):
     SELECT COUNT(*)  
     FROM card_listings
     WHERE card_name = '%s' 
-    AND ts::time BETWEEN '%s' AND '%s';
-    '''%(card_name, now_date_time_hour, now_date_time_hour_puls_frequency)
+    AND ts::time = '%s'::time 
+    AND ts::date = '%s'::date;
+    '''%(card_name, now_date_time_hour, now_date_time_hour)
     
     df_result = pd.read_sql_query(query, engine)
     
     if debug==True:
         print(query)
     
-    return df_result.iloc[0][0], now_date_time_hour, now_date_time_hour_puls_frequency
+    return df_result.iloc[0][0], now_date_time_hour
 
 
-# In[8]:
+# In[7]:
 
 
 def main(engine, debug=False):
@@ -315,9 +313,9 @@ def main(engine, debug=False):
         '''
         checks if its time to insert data for this card, and skips it if its not
         '''
-        count, now, now_plus_frequency = conditional_insert(engine, card_name, frequency=30, debug=debug)
+        count, now = conditional_insert(engine, card_name, debug=debug)
         if count > 0:
-            print('There are already %d records from %s to %s'%(count, now, now_plus_frequency))
+            print('There are already %d records at %s'%(count, now))
             continue
         
         url = card_names_urls[card_name]
