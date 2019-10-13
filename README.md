@@ -89,6 +89,8 @@ nmap -p 49000 mtgdata.ml
 allow connections on specific port:
 sudo ufw allow 49000
 
+# How do I properly test whether my Port Forwarding works?
+https://superuser.com/questions/307820/how-do-i-properly-test-whether-my-port-forwarding-works
 
 # timezone notes
 
