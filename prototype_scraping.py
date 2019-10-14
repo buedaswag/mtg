@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 from psycopg2.errors import UndefinedTable
 from webdriver_manager.chrome import ChromeDriverManager
-#from webdriver_manager.firefox import GeckoDriverManager
+from IPython.display import display
 
 
 # In[2]:
@@ -50,19 +50,7 @@ def load_page(url, card_name, debug = False):
         return html
     
     driver_path = Path(os.path.join(Path().absolute(), 'chromedriver', 'chromedriver'))
-    #driver = webdriver.Chrome(driver_path)
     driver = webdriver.Chrome('/usr/bin/chromedriver')
-    #options = webdriver.ChromeOptions()
-    #options.binary_location = '/opt/google/chrome/google-chrome'
-    #service_log_path = "{}/chromedriver.log".format(logs_path)
-    #service_args = ['--verbose']
-    #driver = webdriver.Chrome(ChromeDriverManager().install(), #'/path/to/chromedriver',
-    #        chrome_options=options)#,
-            #service_args=service_args,
-            #service_log_path=service_log_path)
-    #driver = webdriver.Chrome(ChromeDriverManager().install())
-    #driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
-    #driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(url)
     delay = 2
     timeout = 0
@@ -112,7 +100,7 @@ def get_soup(html):
     return info, table
 
 
-# In[4]:
+# In[5]:
 
 
 def get_sales_available_items(row_tag):
@@ -122,6 +110,13 @@ def get_sales_available_items(row_tag):
     sales = match[0][:-7]
     available_items = match[1][1:-16]
     return sales, available_items
+
+def get_item_location(row_tag):
+    tag=row_tag.find_all('span', class_='icon d-flex has-content-centered mr-1')[0]
+    regex = r'\"Item\slocation:\s.*?\"'
+    match = re.findall(regex, str(tag))
+    item_location = match[0][16:-1]
+    return item_location
 
 def get_product_information(row_tag):
     tag=row_tag.find_all('div', class_='product-attributes col-auto col-md-12 col-xl-5')[0]#.get_text().strip()
@@ -169,7 +164,7 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
         seller_sales.append(sales)
         seller_available_items.append(available_items)
 
-        item_locations.append(row_tag.find_all('span', class_='icon d-flex has-content-centered mr-1')[0]['title'][15:])
+        item_locations.append(get_item_location(row_tag))
 
         item_condition, item_language, item_is_playset, item_is_foil= get_product_information(row_tag)
         item_conditions.append(item_condition)
@@ -233,7 +228,7 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     return df
 
 
-# In[5]:
+# In[6]:
 
 
 ''' 
@@ -251,7 +246,7 @@ def get_db_connection():
     return engine
 
 
-# In[6]:
+# In[7]:
 
 
 def conditional_insert(engine, card_name, debug = False):
@@ -287,7 +282,7 @@ def conditional_insert(engine, card_name, debug = False):
     return df_result.iloc[0][0], now_date_time_hour
 
 
-# In[7]:
+# In[8]:
 
 
 def main(engine, debug=False, debug_hard=False):
@@ -322,7 +317,7 @@ def main(engine, debug=False, debug_hard=False):
         html = load_page(url, card_name, debug=debug)
         info, table = get_soup(html)
         row_tags = table.find_all('div', class_='row no-gutters article-row')
-        df = get_data(row_tags, card_name, now)
+        df = get_data(row_tags, card_name, now, debug_hard=debug_hard)
         
         print('inserting records of card %s with shape %s at %s'%(card_name, str(df.shape), str(now)))
         
@@ -333,6 +328,7 @@ def main(engine, debug=False, debug_hard=False):
             print(card_names_urls[card_name])
             print(df.shape)
             print(df.dtypes)
+            print(df.head(1))
         if debug_hard == True:
             with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
                 display(df)
@@ -342,7 +338,9 @@ if __name__ == '__main__':
         start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
         engine = get_db_connection()
         
-        main(engine, debug=False)
+        print('-----------------------------------------------------------------------------')
+        main(engine, debug=True, debug_hard=False)
+        print('-----------------------------------------------------------------------------')
         
         end = pd.Timestamp.now(tz='UTC')
         print('start: %s'%(start,))
@@ -353,8 +351,48 @@ if __name__ == '__main__':
     
 
 
-# In[8]:
+# In[ ]:
+
+
+if True:
+    engine = get_db_connection()
+    query = '''
+    DELETE 
+    FROM card_listings
+    WHERE ts::date = now()::date;
+
+    '''
+
+    with engine.connect() as conn:
+        conn.execute(query)
+
+
+# In[ ]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 
