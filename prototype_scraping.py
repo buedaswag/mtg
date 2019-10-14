@@ -29,6 +29,22 @@ from IPython.display import display
 # In[2]:
 
 
+def remove_today_records():
+    engine = get_db_connection()
+    query = '''
+    DELETE 
+    FROM card_listings
+    WHERE ts::date = now()::date;
+
+    '''
+
+    with engine.connect() as conn:
+        conn.execute(query)
+
+
+# In[3]:
+
+
 class TimeLimitExpired(Exception):
     pass
 
@@ -83,7 +99,7 @@ def load_page(url, card_name, debug = False):
     return html
 
 
-# In[3]:
+# In[4]:
 
 
 def get_soup(html):
@@ -263,8 +279,9 @@ def conditional_insert(engine, card_name, debug = False):
     minute = 0 if now.minute < 30 else 30
     now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
     
-    with engine.connect() as conn:
-        print('timezone: %s' % (conn.execute('show timezone;').fetchall()[0],))
+    if debug == True:
+        with engine.connect() as conn:
+            print('timezone: %s' % (conn.execute('show timezone;').fetchall()[0],))
 
     query = '''
     SELECT COUNT(*)  
@@ -282,7 +299,7 @@ def conditional_insert(engine, card_name, debug = False):
     return df_result.iloc[0][0], now_date_time_hour
 
 
-# In[8]:
+# In[ ]:
 
 
 def main(engine, debug=False, debug_hard=False):
@@ -320,6 +337,8 @@ def main(engine, debug=False, debug_hard=False):
         df = get_data(row_tags, card_name, now, debug_hard=debug_hard)
         
         print('inserting records of card %s with shape %s at %s'%(card_name, str(df.shape), str(now)))
+        print('head: ')
+        print(df.head(1))
         
         df.to_sql('card_listings', con=engine, if_exists='append', index=False)
         
@@ -328,19 +347,18 @@ def main(engine, debug=False, debug_hard=False):
             print(card_names_urls[card_name])
             print(df.shape)
             print(df.dtypes)
-            print(df.head(1))
+            
         if debug_hard == True:
             with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
                 display(df)
         
 if __name__ == '__main__':
+    print('-----------------------------------------------------------------------------')
     try: 
         start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
         engine = get_db_connection()
         
-        print('-----------------------------------------------------------------------------')
-        main(engine, debug=True, debug_hard=False)
-        print('-----------------------------------------------------------------------------')
+        main(engine, debug=False, debug_hard=False)
         
         end = pd.Timestamp.now(tz='UTC')
         print('start: %s'%(start,))
@@ -348,51 +366,11 @@ if __name__ == '__main__':
         print('duration: %s'%(end - start,))
     finally:
         engine.dispose()
-    
-
-
-# In[ ]:
-
-
-if True:
-    engine = get_db_connection()
-    query = '''
-    DELETE 
-    FROM card_listings
-    WHERE ts::date = now()::date;
-
-    '''
-
-    with engine.connect() as conn:
-        conn.execute(query)
+    print('-----------------------------------------------------------------------------')
 
 
 # In[ ]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
