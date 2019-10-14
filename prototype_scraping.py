@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[7]:
 
 
 from selenium import webdriver 
@@ -26,7 +26,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 from IPython.display import display
 
 
-# In[2]:
+# In[9]:
+
+
+#remove_today_records()
+
+
+# In[3]:
 
 
 def remove_today_records():
@@ -299,7 +305,7 @@ def conditional_insert(engine, card_name, debug = False):
     return df_result.iloc[0][0], now_date_time_hour
 
 
-# In[ ]:
+# In[8]:
 
 
 def main(engine, debug=False, debug_hard=False):
@@ -338,7 +344,8 @@ def main(engine, debug=False, debug_hard=False):
         
         print('inserting records of card %s with shape %s at %s'%(card_name, str(df.shape), str(now)))
         print('head: ')
-        print(df.head(1))
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+            print(df.head(1))
         
         df.to_sql('card_listings', con=engine, if_exists='append', index=False)
         
@@ -349,7 +356,7 @@ def main(engine, debug=False, debug_hard=False):
             print(df.dtypes)
             
         if debug_hard == True:
-            with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+            with pd.option_context('display.max_rows', None, 'display.max_columns', 20):  # more options can be specified also
                 display(df)
         
 if __name__ == '__main__':
@@ -369,7 +376,7 @@ if __name__ == '__main__':
     print('-----------------------------------------------------------------------------')
 
 
-# In[ ]:
+# In[9]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')

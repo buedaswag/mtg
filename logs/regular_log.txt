@@ -1,1 +1,66 @@
 
+-----------------------------------------------------------------------------
+inserting records of card Snow Covered Island with shape (1275, 13) at 2019-10-14 19:30:00
+head: 
+             card_name                  ts  list_order seller_name  \
+0  Snow Covered Island 2019-10-14 19:30:00           0   toycastle   
+
+   seller_sales  seller_available_items  item_price  item_amount  \
+0          3368                  119328        0.09            1   
+
+  item_location item_condition item_language  item_is_playset  item_is_foil  
+0       Austria             NM       English            False         False  
+inserting records of card Fabled Passage with shape (613, 13) at 2019-10-14 19:30:00
+head: 
+        card_name                  ts  list_order seller_name  seller_sales  \
+0  Fabled Passage 2019-10-14 19:30:00           0   Deltibero           118   
+
+   seller_available_items  item_price  item_amount item_location  \
+0                    2275        8.14            1         Spain   
+
+  item_condition item_language  item_is_playset  item_is_foil  
+0             NM       Spanish            False         False  
+inserting records of card Once Upon a Time with shape (467, 13) at 2019-10-14 19:30:00
+head: 
+          card_name                  ts  list_order    seller_name  \
+0  Once Upon a Time 2019-10-14 19:30:00           0  Raqueluchiiii   
+
+   seller_sales  seller_available_items  item_price  item_amount  \
+0            39                     452         8.3            1   
+
+  item_location item_condition item_language  item_is_playset  item_is_foil  
+0         Spain             NM       English            False         False  
+inserting records of card Murderous Rider // Swift End with shape (914, 13) at 2019-10-14 19:30:00
+head: 
+                      card_name                  ts  list_order seller_name  \
+0  Murderous Rider // Swift End 2019-10-14 19:30:00           0       T3zz3   
+
+   seller_sales  seller_available_items  item_price  item_amount  \
+0             0                      20        6.98            1   
+
+  item_location item_condition item_language  item_is_playset  item_is_foil  
+0         Spain             NM       Spanish            False         False  
+inserting records of card Questing Beast with shape (345, 13) at 2019-10-14 19:30:00
+head: 
+        card_name                  ts  list_order seller_name  seller_sales  \
+0  Questing Beast 2019-10-14 19:30:00           0  pinglebiff            37   
+
+   seller_available_items  item_price  item_amount item_location  \
+0                     959        14.0            1        Norway   
+
+  item_condition item_language  item_is_playset  item_is_foil  
+0             NM       English            False         False  
+inserting records of card Oko, Thief of Crowns with shape (443, 13) at 2019-10-14 19:30:00
+head: 
+              card_name                  ts  list_order seller_name  \
+0  Oko, Thief of Crowns 2019-10-14 19:30:00           0      PkCore   
+
+   seller_sales  seller_available_items  item_price  item_amount  \
+0             0                       1       25.49            1   
+
+  item_location item_condition item_language  item_is_playset  item_is_foil  
+0         Spain              M       Spanish            False         False  
+start: 2019-10-14 19:46:10.360281+00:00
+end: 2019-10-14 19:50:24.238789+00:00
+duration: 0 days 00:04:13.878508
+-----------------------------------------------------------------------------
