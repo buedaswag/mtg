@@ -21,7 +21,7 @@ create database mtg;<br />
 CREATE TABLE card_listings (<br />
   card_name varchar(100), <br />
   ts timestamp, <br />
-  list_order int, <br />
+  avg_sell_price float, <br />
   seller_name varchar(30), <br />
   seller_sales int, <br />
   seller_available_items int, <br />
@@ -46,6 +46,13 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO mig;<br />
 
 GRANT USAGE ON SCHEMA public TO mig; <br />
 GRANT SELECT, UPDATE, INSERT, DELETE ON ALL TABLES IN SCHEMA public TO mig;<br />
+
+<br />
+ALTER TABLE card_listings 
+DROP COLUMN list_order;
+
+ALTER TABLE card_listings 
+ADD COLUMN avg_sell_price float DEFAULT 0.0;
 
 # cron notes
 

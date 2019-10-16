@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[1]:
 
 
 from selenium import webdriver 
@@ -26,13 +26,30 @@ from webdriver_manager.chrome import ChromeDriverManager
 from IPython.display import display
 
 
-# In[9]:
+# In[2]:
 
 
 #remove_today_records()
 
 
 # In[3]:
+
+
+''' test some scraping
+card_name = 'Questing Beast'
+url = 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Questing-Beast'
+html = load_page(url, card_name, debug = True)
+info, table = get_soup(html)
+
+tag=info.find_all('script', class_='chart-init-script')#[0].get_text().strip()
+regex = r'Avg. Sell Price.*?]'
+match = re.findall(regex, str(tag[0]))
+
+float(match[0][25:-1].split(',')[-1])
+'''
+
+
+# In[4]:
 
 
 def remove_today_records():
@@ -48,7 +65,7 @@ def remove_today_records():
         conn.execute(query)
 
 
-# In[3]:
+# In[5]:
 
 
 class TimeLimitExpired(Exception):
@@ -104,10 +121,6 @@ def load_page(url, card_name, debug = False):
             
     return html
 
-
-# In[4]:
-
-
 def get_soup(html):
     '''
     setup with selenium: get the html to scrape
@@ -120,10 +133,6 @@ def get_soup(html):
     info = info_tag[0]
     
     return info, table
-
-
-# In[5]:
-
 
 def get_sales_available_items(row_tag):
     tag=row_tag.find_all('span', class_='badge badge-faded d-none d-sm-inline-flex has-content-centered mr-1 sell-count')[0]#.get_text().strip()
@@ -159,10 +168,39 @@ def get_product_information(row_tag):
             item_is_foil = True
     return item_conditions, item_languages, item_is_playset, item_is_foil
 
-def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
+def get_avg_sell_price(info):
+    '''
+    get avg_sell_price
+    '''
+    tag=info.find_all('script', class_='chart-init-script')#[0].get_text().strip()
+    regex = r'Avg. Sell Price.*?]'
+    match = re.findall(regex, str(tag[0]))
+    avg_sell_price = float(match[0][25:-1].split(',')[-1])
+    
+    return avg_sell_price
+
+def get_item_info(info):
+    '''
+    get item_info
+    
+    Available items
+    From
+    Price Trend
+    30-days average price
+    7-days average price
+    1-day average price
+    '''
+    
+    tag=info.find_all('dd', class_='col-6 col-xl-7')#[0].get_text().strip()
+    item_info = [t.get_text() for t in tag[3:]]
+    return item_info
+
+def get_data(info, table, card_name, now, debug=False, debug_hard=False):
     '''
     iterate through each row in the table, getting the data
     '''
+    
+    row_tags = table.find_all('div', class_='row no-gutters article-row')
     
     seller_names = []
     item_prices = []
@@ -174,6 +212,7 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     item_languages = []
     item_is_playsets = []
     item_is_foils = []
+    avg_sell_price = get_avg_sell_price(info)
     
     for row_tag in row_tags:
         seller_names.append(row_tag.find_all('span', class_='d-flex has-content-centered mr-1')[0].get_text().strip())
@@ -200,7 +239,7 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     data_dict = {
         'card_name': [card_name for i in range(len(seller_names))],
         'ts': [now for i in range(len(seller_names))],
-        'list_order': [i for i in range(len(seller_names))], 
+        'avg_sell_price': [avg_sell_price for i in range(len(seller_names))], 
         'seller_name': seller_names,
         'seller_sales': seller_sales,
         'seller_available_items': seller_available_items,
@@ -237,21 +276,9 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     df.loc[df.item_is_playset == True, 'item_amount'] =         df.loc[df.item_is_playset == True, 'item_amount'] * 4
 
     if debug_hard == True:
-        display('seller_names', len(seller_names), seller_names[:10], 
-            'item_prices', len(item_prices), item_prices[:10], 
-            'item_amounts', len(item_amounts), item_amounts[:10], 
-            'item_locations', len(item_locations), item_locations[:10], 
-            'item_conditions', len(item_conditions), item_conditions[:10], 
-            'item_languages', len(item_languages), item_languages[:10], 
-            'item_is_playsets', len(item_is_playsets), 'True: %d, False: %d'%(len([i for i in item_is_playsets if item_is_playsets[i]==True]), len([i for i in item_is_playsets if item_is_playsets[i]==False])), 
-            'item_is_foils', len(item_is_foils), 'True: %d, False: %d'%(len([i for i in item_is_foils if item_is_foils[i]==True]), len([i for i in item_is_foils if item_is_foils[i]==False])))
         with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
             display(df)
     return df
-
-
-# In[6]:
-
 
 ''' 
 bitconnect to the database 
@@ -266,10 +293,6 @@ def get_db_connection():
 
     engine = create_engine(conn_str)
     return engine
-
-
-# In[7]:
-
 
 def conditional_insert(engine, card_name, debug = False):
     '''
@@ -305,7 +328,7 @@ def conditional_insert(engine, card_name, debug = False):
     return df_result.iloc[0][0], now_date_time_hour
 
 
-# In[8]:
+# In[6]:
 
 
 def main(engine, debug=False, debug_hard=False):
@@ -339,8 +362,7 @@ def main(engine, debug=False, debug_hard=False):
         url = card_names_urls[card_name]
         html = load_page(url, card_name, debug=debug)
         info, table = get_soup(html)
-        row_tags = table.find_all('div', class_='row no-gutters article-row')
-        df = get_data(row_tags, card_name, now, debug_hard=debug_hard)
+        df = get_data(info, table, card_name, now, debug_hard=debug_hard)
         
         print('inserting records of card %s with shape %s at %s'%(card_name, str(df.shape), str(now)))
         print('head: ')
@@ -376,7 +398,7 @@ if __name__ == '__main__':
     print('-----------------------------------------------------------------------------')
 
 
-# In[9]:
+# In[7]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
