@@ -1,4 +1,7 @@
 from flask import Flask, render_template
+from jinja2 import Markup
+
+
 
 app = Flask(__name__)
 
@@ -136,17 +139,17 @@ schema = [{
 def home():
     return render_template("home.html")
 
-@app.route("/column")
-def column_page():
-    return render_template("column.html", chart=columnChart)
-
-@app.route("/line")
-def line_page():
-    return render_template("line.html", chart=lineChart)
-
+'''
 @app.route("/series")
 def series_page():
     return render_template("series.html", data=data,schema=schema)
+'''
+
+
+@app.route("/card")
+def card():
+    #A string that is ready to be safely inserted into an HTML or XML document, either because it was escaped or because it was marked safe
+    return Markup(render_template("card.html", data=data,schema=schema))
     
 if __name__ == "__main__":
     app.run(debug=True)
