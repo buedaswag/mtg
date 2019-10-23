@@ -86,7 +86,7 @@ https://pt.godaddy.com/help/alterar-a-porta-ssh-para-o-seu-servidor-com-o-linux-
 
 ssh -X -p 49000 user@hostname<br />
 ssh -X -p 49000 mig@192.168.1.8<br />
-ssh -X -p 49000 mig@mtgdata.ml
+ssh -X -p 49000 mig@mtgdata.ddns.net
 ssh -X -p 49000 mig@79.168.14.53
 
 check if port is open or closed:
