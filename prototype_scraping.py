@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
+#!/home/mig/anaconda3/envs/mtg/bin/python
 
 # In[1]:
 
@@ -19,7 +18,7 @@ import re
 import time
 from sqlalchemy import create_engine
 import pickle
-import os
+import os, sys
 from pathlib import Path
 from psycopg2.errors import UndefinedTable
 from webdriver_manager.chrome import ChromeDriverManager
@@ -89,7 +88,8 @@ def load_page(url, card_name, debug = False):
         return html
     
     driver_path = Path(os.path.join(Path().absolute(), 'chromedriver', 'chromedriver'))
-    driver = webdriver.Chrome('/usr/bin/chromedriver')
+    #sys.path.insert(0, '~/mtg/chromedriver/chromedriver')
+    driver = webdriver.Chrome('chromedriver/chromedriver')
     driver.get(url)
     delay = 2
     timeout = 0
@@ -341,12 +341,12 @@ def main(engine, debug=False, debug_hard=False):
     card_names and links
     '''
     card_names_urls = {
-        'Snow Covered Island': 'https://www.cardmarket.com/en/Magic/Products/Singles/Modern-Horizons/Snow-Covered-Island', 
-        'Fabled Passage': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Fabled-Passage', 
-        'Once Upon a Time': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Once-Upon-a-Time', 
-        'Murderous Rider // Swift End': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Murderous-Rider-Swift-End', 
-        'Questing Beast': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Questing-Beast', 
-        'Oko, Thief of Crowns': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Oko-Thief-of-Crowns'
+            'Snow Covered Island': 'https://www.cardmarket.com/en/Magic/Products/Singles/Modern-Horizons/Snow-Covered-Island', 
+            'Fabled Passage': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Fabled-Passage', 
+            'Once Upon a Time': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Once-Upon-a-Time', 
+            'Murderous Rider // Swift End': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Murderous-Rider-Swift-End', 
+            'Questing Beast': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Questing-Beast', 
+            'Oko, Thief of Crowns': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Oko-Thief-of-Crowns'
     }
     
     for card_name in card_names_urls:  
@@ -398,8 +398,8 @@ if __name__ == '__main__':
     print('-----------------------------------------------------------------------------')
 
 
-# In[7]:
+# In[9]:
 
 
-get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
+#get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
 

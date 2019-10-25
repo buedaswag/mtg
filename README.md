@@ -10,7 +10,7 @@ CREATE DATABASE mtg;<br />
 
 sudo su - postgres <br />
 psql<br />
-\c DBNAME<br />
+\c DBNAME <- to access the created db<br />
 create database mtg;<br />
 \l # list databases, then press q to go back to db console<br />
 
@@ -32,6 +32,7 @@ CREATE TABLE card_listings (<br />
   item_language varchar(20),  <br />
   item_is_playset boolean, <br />
   item_is_foil boolean,<br />
+  list_order int<br />
   PRIMARY KEY (card_name, ts, list_order)<br />
 );<br />
 
@@ -52,7 +53,13 @@ ALTER TABLE card_listings
 DROP COLUMN list_order;
 
 ALTER TABLE card_listings 
-ADD COLUMN avg_sell_price float DEFAULT 0.0;
+ADD COLUMN list_order int;
+
+-- Firstly, remove PRIMARY KEY attribute of former PRIMARY KEY
+ALTER TABLE card_listings DROP CONSTRAINT card_listings_pkey;
+
+-- Lastly set your new PRIMARY KEY
+ALTER TABLE card_listings ADD PRIMARY KEY (card_name, ts, list_order);
 
 # cron notes
 
