@@ -1,12 +1,12 @@
-#! /home/mig/anaconda3/envs/mtg/bin/python
+#!/usr/bin/env python
 from flask import Flask, url_for, render_template, send_from_directory, request
 import jinja2.exceptions
 import pickle
 import pandas as pd 
 import numpy as np 
-import sys
-import os
+import sys, os
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
@@ -15,7 +15,7 @@ def read_stock_data(file_name):
     read and format card stock for the given name
     '''
 
-    with open(os.path.join(sys.path[0], 'pickles', file_name), 'rb') as handle:
+    with open(os.path.join(dir_path, 'pickles', file_name), 'rb') as handle:
         dfs_concatenated = pickle.load(handle)
     dfs_concatenated_formated = dfs_concatenated.copy().reset_index()
     dfs_concatenated_formated.ts = dfs_concatenated_formated.ts.dt.strftime('%Y-%m-%d %H-%M')
@@ -94,4 +94,4 @@ def not_found(e):
     return '<strong>Page Not Found!</strong>', 404
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host= '0.0.0.0')
