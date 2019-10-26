@@ -1,4 +1,5 @@
-#!/home/mig/anaconda3/envs/mtg/bin/python
+#!/usr/bin/env python
+# coding: utf-8
 
 # In[1]:
 
@@ -87,9 +88,7 @@ def load_page(url, card_name, debug = False):
             html = pickle.load(file)
         return html
     
-    driver_path = Path(os.path.join(Path().absolute(), 'chromedriver', 'chromedriver'))
-    #sys.path.insert(0, '~/mtg/chromedriver/chromedriver')
-    driver = webdriver.Chrome('chromedriver/chromedriver')
+    driver = webdriver.Chrome('/usr/bin/chromedriver')
     driver.get(url)
     delay = 2
     timeout = 0
@@ -328,7 +327,7 @@ def conditional_insert(engine, card_name, debug = False):
     return df_result.iloc[0][0], now_date_time_hour
 
 
-# In[6]:
+# In[ ]:
 
 
 def main(engine, debug=False, debug_hard=False):
@@ -383,23 +382,24 @@ def main(engine, debug=False, debug_hard=False):
         
 if __name__ == '__main__':
     print('-----------------------------------------------------------------------------')
+    start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
     try: 
-        start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
         engine = get_db_connection()
         
         main(engine, debug=False, debug_hard=False)
         
+        
+    finally:
+        engine.dispose()
         end = pd.Timestamp.now(tz='UTC')
         print('start: %s'%(start,))
         print('end: %s'%(end,))
         print('duration: %s'%(end - start,))
-    finally:
-        engine.dispose()
     print('-----------------------------------------------------------------------------')
 
 
-# In[9]:
+# In[ ]:
 
 
-###get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
+get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
 

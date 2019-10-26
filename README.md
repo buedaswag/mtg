@@ -1,6 +1,20 @@
 # mtg
 mtg card price visualization project
 
+# apache notes
+
+run server undaemonized:<br />
+sudo /home/mig/anaconda3/envs/mtg/bin/mod_wsgi-express start-server ~/mtg/app/app/app.wsgi --port=80 --user www-data --group www-data --log-to-terminal<br />
+
+run server daemonized:
+sudo /home/mig/anaconda3/envs/mtg/bin/mod_wsgi-express setup-server ~/mtg/app/app/app.wsgi --port=80 --user www-data --group www-data --server-root=/etc/mod_wsgi-express-80 --log-to-terminal<br />
+
+then to start daemon:<br />
+sudo /etc/mod_wsgi-express-80/apachectl start<br />
+
+then stop daemon:<br />
+sudo /etc/mod_wsgi-express-80/apachectl stop<br />
+
 # postgres notes
 psql [database_name] [user_name]<br />
 psql mtg mig<br />
@@ -31,9 +45,7 @@ CREATE TABLE card_listings (<br />
   item_condition char(2), <br />
   item_language varchar(20),  <br />
   item_is_playset boolean, <br />
-  item_is_foil boolean,<br />
-  list_order int<br />
-  PRIMARY KEY (card_name, ts, list_order)<br />
+  item_is_foil boolean<br />
 );<br />
 
 create user mig with password 'password';<br />
