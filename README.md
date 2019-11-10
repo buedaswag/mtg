@@ -82,10 +82,10 @@ https://askubuntu.com/questions/420981/how-do-i-save-terminal-output-to-a-file<b
 crontab -u mig -e
 
 #regular job
-*/30 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/regular_log.txt<br />
+*/30 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py |& tee -a ~/mtg/logs/regular_log.txt<br />
 
 #experimental job
-25 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py | tee -a ~/mtg/logs/experimental_log.txt<br />
+25 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py |&  tee -a ~/mtg/logs/experimental_log.txt<br />
 
 # SSH access remote server, and running graphics applications (browser windows, for example)
 https://askubuntu.com/questions/213678/how-to-install-x11-xorg<br />
