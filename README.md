@@ -79,12 +79,20 @@ https://askubuntu.com/questions/420981/how-do-i-save-terminal-output-to-a-file<b
 
 https://askubuntu.com/questions/420981/how-do-i-save-terminal-output-to-a-file<br />
 
+crontab -e
 crontab -u mig -e
 
-#regular job
-*/30 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py |& tee -a ~/mtg/logs/regular_log.txt<br />
+# change defaulty shell for cron
+SHELL=/bin/bash
 
-#experimental job
+#regular prototype_scraping job
+0 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py |& tee -a ~/mtg/logs/regular_log.txt<br />
+
+#regular prototype_web_plot_update_data job
+30 * * * * /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_web_plot_update_data.py |& tee -a ~/mtg/logs/plot_update_log.txt<br />
+
+
+#experimental prototype_scraping job
 25 * * * * export DISPLAY=:0.0 ; /home/mig/anaconda3/envs/mtg/bin/python ~/mtg/prototype_scraping.py |&  tee -a ~/mtg/logs/experimental_log.txt<br />
 
 # SSH access remote server, and running graphics applications (browser windows, for example)
