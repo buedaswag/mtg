@@ -36,8 +36,10 @@ from IPython.display import display
 
 
 ''' test some scraping
-card_name = 'Questing Beast'
+
+card_name = 'Snow-Covered Island'
 url = 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Questing-Beast'
+url = 'https://www.cardmarket.com/en/Magic/Products/Singles/Modern-Horizons/Snow-Covered-Island'
 html = load_page(url, card_name, debug = True)
 info, table = get_soup(html)
 
@@ -46,10 +48,30 @@ regex = r'Avg. Sell Price.*?]'
 match = re.findall(regex, str(tag[0]))
 
 float(match[0][25:-1].split(',')[-1])
+
+now = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')
+minute = 0 
+now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
+
+df = get_data(info, table, card_name, now, debug=False, debug_hard=False)
+
+df
 '''
 
 
 # In[4]:
+
+
+def get_sales_available_items(row_tag):
+    #tag=row_tag.find_all('span', class_='badge badge-faded d-none d-sm-inline-flex has-content-centered mr-1 sell-count')[0]#.get_text().strip()
+    regex = r'\d+\sSales\s|\s\d+\sAvailable\sitems'
+    match = re.findall(regex, str(row_tag))
+    sales = match[0][:-7]
+    available_items = match[1][1:-16]
+    return sales, available_items
+
+
+# In[5]:
 
 
 def remove_today_records():
@@ -65,7 +87,7 @@ def remove_today_records():
         conn.execute(query)
 
 
-# In[5]:
+# In[6]:
 
 
 class TimeLimitExpired(Exception):
@@ -74,6 +96,9 @@ class TimeLimitExpired(Exception):
 def load_page(url, card_name, debug = False):
     '''
     setup - load entire page, pressing 'show more' button
+    -------------------------------------
+    If debuf is True, tries to load an existing pickle containing html, 
+    and if this file does not exist, loads the web page and stores the html as a pickle.
     '''
     
     #fix card name
@@ -134,9 +159,9 @@ def get_soup(html):
     return info, table
 
 def get_sales_available_items(row_tag):
-    tag=row_tag.find_all('span', class_='badge badge-faded d-none d-sm-inline-flex has-content-centered mr-1 sell-count')[0]#.get_text().strip()
+    #tag=row_tag.find_all('span', class_='badge badge-faded d-none d-sm-inline-flex has-content-centered mr-1 sell-count')[0]#.get_text().strip()
     regex = r'\d+\sSales\s|\s\d+\sAvailable\sitems'
-    match = re.findall(regex, str(tag))
+    match = re.findall(regex, str(row_tag))
     sales = match[0][:-7]
     available_items = match[1][1:-16]
     return sales, available_items
@@ -219,7 +244,7 @@ def get_data(info, table, card_name, now, debug=False, debug_hard=False):
         item_prices.append(row_tag.find_all('span', class_='font-weight-bold color-primary small text-right text-nowrap')[0].get_text().strip()[:-2])
 
         item_amounts.append(row_tag.find_all('span', class_='item-count small text-right')[0].get_text().strip()[:])
-
+        
         sales, available_items = get_sales_available_items(row_tag)
         seller_sales.append(sales)
         seller_available_items.append(available_items)
@@ -258,6 +283,7 @@ def get_data(info, table, card_name, now, debug=False, debug_hard=False):
     df.seller_sales = df.seller_sales.astype(int)
     df.seller_available_items = df.seller_available_items.astype(int)
     df.item_amount = df.item_amount.astype(int)
+    df.item_price = df.item_price.str.replace('.', '')
     df.item_price = df.item_price.str.replace(',', '.')
     df.item_price = df.item_price.astype(float)
     
@@ -304,7 +330,16 @@ def conditional_insert(engine, card_name, debug = False):
     '''
     
     now = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')
+    
+    '''
+    for example, inserting every 30 minutes:
     minute = 0 if now.minute < 30 else 30
+    
+    inserting every hour:
+    minute = 0 
+    '''
+    minute = 0 
+    
     now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
     
     if debug == True:
