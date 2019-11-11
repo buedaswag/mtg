@@ -3,5 +3,5 @@
 import logging
 import sys
 logging.basicConfig(stream=sys.stderr)
-sys.path.insert(0, '~/mtg/app/')
+sys.path.append('/home/mig/mtg/app/app/')
 from app.app.flask_app import app as application
