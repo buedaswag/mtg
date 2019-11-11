@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[27]:
 
 
 card_names = [
@@ -19,7 +19,7 @@ card_name = card_names[index]
 file_names
 
 
-# In[3]:
+# In[28]:
 
 
 '''
@@ -31,11 +31,10 @@ from sqlalchemy import create_engine
 import pickle
 from scipy.stats import zscore
 
-get_ipython().run_line_magic('matplotlib', 'inline')
 idx = pd.IndexSlice
 
 
-# In[20]:
+# In[29]:
 
 
 def get_db_connection_test(local = False):
@@ -116,13 +115,7 @@ if server is not None:
 df = data_transformer(df)
 
 
-# In[21]:
-
-
-df.head()
-
-
-# In[22]:
+# In[31]:
 
 
 #with open('./pickles/df.pickle', 'rb') as handle:
@@ -155,7 +148,7 @@ df.head()
 
 # # web_plot_price_distribution_lastest_time_stamp_all
 
-# In[25]:
+# In[32]:
 
 
 for card_name, file_name in zip(card_names, file_names):
@@ -226,8 +219,8 @@ for card_name, file_name in zip(card_names, file_names):
         pickle.dump(list_pickle, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-# In[26]:
+# In[33]:
 
 
-get_ipython().system('jupyter nbconvert --to script prototype_web_plot_update_data.ipynb')
+#get_ipython().system('jupyter nbconvert --to script prototype_web_plot_update_data.ipynb')
 

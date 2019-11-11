@@ -436,5 +436,5 @@ if __name__ == '__main__':
 # In[ ]:
 
 
-get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
+#get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
 
