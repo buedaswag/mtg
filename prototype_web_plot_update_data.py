@@ -165,7 +165,7 @@ for card_name, file_name in zip(card_names, file_names):
     list_pickle = df_pickle.values.tolist() 
     print(list_pickle[0])
     
-    with open('./app/app/pickles/' + file_name + '_item_cheapest_price_item_amount.pickle', 'wb') as handle:
+    with open('~/mtg/app/app/pickles/' + file_name + '_item_cheapest_price_item_amount.pickle', 'wb') as handle:
         pickle.dump(list_pickle, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
     '''
@@ -215,7 +215,7 @@ for card_name, file_name in zip(card_names, file_names):
     list_pickle = list(df_pickle.T.to_dict().values())
     print(list_pickle[0])
 
-    with open('./app/app/pickles/' + file_name + '_price_distribution_lastest_time_stamp.pickle', 'wb') as handle:
+    with open('~/mtg/app/app/pickles/' + file_name + '_price_distribution_lastest_time_stamp.pickle', 'wb') as handle:
         pickle.dump(list_pickle, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
