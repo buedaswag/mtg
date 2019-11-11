@@ -15,6 +15,17 @@ sudo /etc/mod_wsgi-express-80/apachectl start<br />
 then stop daemon:<br />
 sudo /etc/mod_wsgi-express-80/apachectl stop<br />
 
+<br />ERRORS:
+<br />(to view errors, stop daemon server and start an undaemonized one)
+
+<br />ModuleNotFoundError: No module named 'app':
+<br /> - check if apahe has permissions to read and execute files in the project folder
+<br /> - to check apache user, run: apachectl -S
+<br /> - So, in order to make a directory writable by the webserver we have to set the directory’s owner or group to Apache’s owner or group and enable the write permission for it. Usually, we set the directory to belong to the Apache group (apache or `www-data or whatever user is used to launch the child processes) and enable the write permission for the group.
+<br />chgrp www-data ~/mtg/app/
+<br />chmod g+rwx ~/mtg/app/
+<br /> - also check if any imports are failing
+
 # postgres notes
 psql [database_name] [user_name]<br />
 psql mtg mig<br />

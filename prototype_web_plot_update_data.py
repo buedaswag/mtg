@@ -26,9 +26,7 @@ file_names
 loading the pickled data to plot, produce it in a format ready to be consumed by fusion
 '''
 import pandas as pd 
-from matplotlib import pyplot as plt 
 import numpy as np 
-import matplotlib 
 from sqlalchemy import create_engine
 import pickle
 from scipy.stats import zscore
@@ -228,7 +226,7 @@ for card_name, file_name in zip(card_names, file_names):
         pickle.dump(list_pickle, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-# In[ ]:
+# In[26]:
 
 
 get_ipython().system('jupyter nbconvert --to script prototype_web_plot_update_data.ipynb')
