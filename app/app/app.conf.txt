@@ -1,0 +1,17 @@
+<VirtualHost *:80>
+    # Add machine's IP address (use ifconfig command)
+    ServerName localhost
+    #telling mod_wsgi to execute the application under a different user for security reasons
+    # WSGIDaemonProcess app user=app group=app
+    # Give an alias to to start your website url with
+    WSGIScriptAlias /test_app ~/mtg/app/app/app.wsgi
+    <Directory ~/mtg/app/app/>
+    	    # set permissions as per apache2.conf file
+            Options FollowSymLinks
+            AllowOverride None
+            Require all granted
+    </Directory>
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    LogLevel warn
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

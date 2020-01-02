@@ -19,14 +19,75 @@ import re
 import time
 from sqlalchemy import create_engine
 import pickle
-import os
+import os, sys
 from pathlib import Path
 from psycopg2.errors import UndefinedTable
 from webdriver_manager.chrome import ChromeDriverManager
-#from webdriver_manager.firefox import GeckoDriverManager
+from IPython.display import display
 
 
 # In[2]:
+
+
+#remove_today_records()
+
+
+# In[3]:
+
+
+''' test some scraping
+
+card_name = 'Snow-Covered Island'
+url = 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Questing-Beast'
+url = 'https://www.cardmarket.com/en/Magic/Products/Singles/Modern-Horizons/Snow-Covered-Island'
+html = load_page(url, card_name, debug = True)
+info, table = get_soup(html)
+
+tag=info.find_all('script', class_='chart-init-script')#[0].get_text().strip()
+regex = r'Avg. Sell Price.*?]'
+match = re.findall(regex, str(tag[0]))
+
+float(match[0][25:-1].split(',')[-1])
+
+now = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')
+minute = 0 
+now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
+
+df = get_data(info, table, card_name, now, debug=False, debug_hard=False)
+
+df
+'''
+
+
+# In[4]:
+
+
+def get_sales_available_items(row_tag):
+    #tag=row_tag.find_all('span', class_='badge badge-faded d-none d-sm-inline-flex has-content-centered mr-1 sell-count')[0]#.get_text().strip()
+    regex = r'\d+\sSales\s|\s\d+\sAvailable\sitems'
+    match = re.findall(regex, str(row_tag))
+    sales = match[0][:-7]
+    available_items = match[1][1:-16]
+    return sales, available_items
+
+
+# In[5]:
+
+
+def remove_today_records():
+    engine = get_db_connection()
+    query = '''
+    DELETE 
+    FROM card_listings
+    WHERE ts::date = now()::date;
+
+    '''
+
+    with engine.connect() as conn:
+        conn.execute(query)
+
+
+# In[6]:
 
 
 class TimeLimitExpired(Exception):
@@ -35,6 +96,9 @@ class TimeLimitExpired(Exception):
 def load_page(url, card_name, debug = False):
     '''
     setup - load entire page, pressing 'show more' button
+    -------------------------------------
+    If debuf is True, tries to load an existing pickle containing html, 
+    and if this file does not exist, loads the web page and stores the html as a pickle.
     '''
     
     #fix card name
@@ -49,20 +113,7 @@ def load_page(url, card_name, debug = False):
             html = pickle.load(file)
         return html
     
-    driver_path = Path(os.path.join(Path().absolute(), 'chromedriver', 'chromedriver'))
-    #driver = webdriver.Chrome(driver_path)
     driver = webdriver.Chrome('/usr/bin/chromedriver')
-    #options = webdriver.ChromeOptions()
-    #options.binary_location = '/opt/google/chrome/google-chrome'
-    #service_log_path = "{}/chromedriver.log".format(logs_path)
-    #service_args = ['--verbose']
-    #driver = webdriver.Chrome(ChromeDriverManager().install(), #'/path/to/chromedriver',
-    #        chrome_options=options)#,
-            #service_args=service_args,
-            #service_log_path=service_log_path)
-    #driver = webdriver.Chrome(ChromeDriverManager().install())
-    #driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
-    #driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(url)
     delay = 2
     timeout = 0
@@ -94,10 +145,6 @@ def load_page(url, card_name, debug = False):
             
     return html
 
-
-# In[3]:
-
-
 def get_soup(html):
     '''
     setup with selenium: get the html to scrape
@@ -111,17 +158,20 @@ def get_soup(html):
     
     return info, table
 
-
-# In[4]:
-
-
 def get_sales_available_items(row_tag):
-    tag=row_tag.find_all('span', class_='badge badge-faded d-none d-sm-inline-flex has-content-centered mr-1 sell-count')[0]#.get_text().strip()
+    #tag=row_tag.find_all('span', class_='badge badge-faded d-none d-sm-inline-flex has-content-centered mr-1 sell-count')[0]#.get_text().strip()
     regex = r'\d+\sSales\s|\s\d+\sAvailable\sitems'
-    match = re.findall(regex, str(tag))
+    match = re.findall(regex, str(row_tag))
     sales = match[0][:-7]
     available_items = match[1][1:-16]
     return sales, available_items
+
+def get_item_location(row_tag):
+    tag=row_tag.find_all('span', class_='icon d-flex has-content-centered mr-1')[0]
+    regex = r'\"Item\slocation:\s.*?\"'
+    match = re.findall(regex, str(tag))
+    item_location = match[0][16:-1]
+    return item_location
 
 def get_product_information(row_tag):
     tag=row_tag.find_all('div', class_='product-attributes col-auto col-md-12 col-xl-5')[0]#.get_text().strip()
@@ -142,10 +192,39 @@ def get_product_information(row_tag):
             item_is_foil = True
     return item_conditions, item_languages, item_is_playset, item_is_foil
 
-def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
+def get_avg_sell_price(info):
+    '''
+    get avg_sell_price
+    '''
+    tag=info.find_all('script', class_='chart-init-script')#[0].get_text().strip()
+    regex = r'Avg. Sell Price.*?]'
+    match = re.findall(regex, str(tag[0]))
+    avg_sell_price = float(match[0][25:-1].split(',')[-1])
+    
+    return avg_sell_price
+
+def get_item_info(info):
+    '''
+    get item_info
+    
+    Available items
+    From
+    Price Trend
+    30-days average price
+    7-days average price
+    1-day average price
+    '''
+    
+    tag=info.find_all('dd', class_='col-6 col-xl-7')#[0].get_text().strip()
+    item_info = [t.get_text() for t in tag[3:]]
+    return item_info
+
+def get_data(info, table, card_name, now, debug=False, debug_hard=False):
     '''
     iterate through each row in the table, getting the data
     '''
+    
+    row_tags = table.find_all('div', class_='row no-gutters article-row')
     
     seller_names = []
     item_prices = []
@@ -157,6 +236,7 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     item_languages = []
     item_is_playsets = []
     item_is_foils = []
+    avg_sell_price = get_avg_sell_price(info)
     
     for row_tag in row_tags:
         seller_names.append(row_tag.find_all('span', class_='d-flex has-content-centered mr-1')[0].get_text().strip())
@@ -164,12 +244,12 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
         item_prices.append(row_tag.find_all('span', class_='font-weight-bold color-primary small text-right text-nowrap')[0].get_text().strip()[:-2])
 
         item_amounts.append(row_tag.find_all('span', class_='item-count small text-right')[0].get_text().strip()[:])
-
+        
         sales, available_items = get_sales_available_items(row_tag)
         seller_sales.append(sales)
         seller_available_items.append(available_items)
 
-        item_locations.append(row_tag.find_all('span', class_='icon d-flex has-content-centered mr-1')[0]['title'][15:])
+        item_locations.append(get_item_location(row_tag))
 
         item_condition, item_language, item_is_playset, item_is_foil= get_product_information(row_tag)
         item_conditions.append(item_condition)
@@ -183,7 +263,7 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     data_dict = {
         'card_name': [card_name for i in range(len(seller_names))],
         'ts': [now for i in range(len(seller_names))],
-        'list_order': [i for i in range(len(seller_names))], 
+        'avg_sell_price': [avg_sell_price for i in range(len(seller_names))], 
         'seller_name': seller_names,
         'seller_sales': seller_sales,
         'seller_available_items': seller_available_items,
@@ -203,6 +283,7 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     df.seller_sales = df.seller_sales.astype(int)
     df.seller_available_items = df.seller_available_items.astype(int)
     df.item_amount = df.item_amount.astype(int)
+    df.item_price = df.item_price.str.replace('.', '')
     df.item_price = df.item_price.str.replace(',', '.')
     df.item_price = df.item_price.astype(float)
     
@@ -220,21 +301,9 @@ def get_data(row_tags, card_name, now, debug=False, debug_hard=False):
     df.loc[df.item_is_playset == True, 'item_amount'] =         df.loc[df.item_is_playset == True, 'item_amount'] * 4
 
     if debug_hard == True:
-        display('seller_names', len(seller_names), seller_names[:10], 
-            'item_prices', len(item_prices), item_prices[:10], 
-            'item_amounts', len(item_amounts), item_amounts[:10], 
-            'item_locations', len(item_locations), item_locations[:10], 
-            'item_conditions', len(item_conditions), item_conditions[:10], 
-            'item_languages', len(item_languages), item_languages[:10], 
-            'item_is_playsets', len(item_is_playsets), 'True: %d, False: %d'%(len([i for i in item_is_playsets if item_is_playsets[i]==True]), len([i for i in item_is_playsets if item_is_playsets[i]==False])), 
-            'item_is_foils', len(item_is_foils), 'True: %d, False: %d'%(len([i for i in item_is_foils if item_is_foils[i]==True]), len([i for i in item_is_foils if item_is_foils[i]==False])))
         with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
             display(df)
     return df
-
-
-# In[5]:
-
 
 ''' 
 bitconnect to the database 
@@ -250,10 +319,6 @@ def get_db_connection():
     engine = create_engine(conn_str)
     return engine
 
-
-# In[6]:
-
-
 def conditional_insert(engine, card_name, debug = False):
     '''
     Checks if its time to insert records in the database.
@@ -265,11 +330,21 @@ def conditional_insert(engine, card_name, debug = False):
     '''
     
     now = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')
+    
+    '''
+    for example, inserting every 30 minutes:
     minute = 0 if now.minute < 30 else 30
+    
+    inserting every hour:
+    minute = 0 
+    '''
+    minute = 0 
+    
     now_date_time_hour = pd.Timestamp(now.year, now.month, now.day, now.hour, minute)
     
-    with engine.connect() as conn:
-        print('timezone: %s' % (conn.execute('show timezone;').fetchall()[0],))
+    if debug == True:
+        with engine.connect() as conn:
+            print('timezone: %s' % (conn.execute('show timezone;').fetchall()[0],))
 
     query = '''
     SELECT COUNT(*)  
@@ -287,7 +362,7 @@ def conditional_insert(engine, card_name, debug = False):
     return df_result.iloc[0][0], now_date_time_hour
 
 
-# In[7]:
+# In[ ]:
 
 
 def main(engine, debug=False, debug_hard=False):
@@ -300,12 +375,12 @@ def main(engine, debug=False, debug_hard=False):
     card_names and links
     '''
     card_names_urls = {
-        'Snow Covered Island': 'https://www.cardmarket.com/en/Magic/Products/Singles/Modern-Horizons/Snow-Covered-Island', 
-        'Fabled Passage': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Fabled-Passage', 
-        'Once Upon a Time': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Once-Upon-a-Time', 
-        'Murderous Rider // Swift End': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Murderous-Rider-Swift-End', 
-        'Questing Beast': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Questing-Beast', 
-        'Oko, Thief of Crowns': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Oko-Thief-of-Crowns'
+            'Snow Covered Island': 'https://www.cardmarket.com/en/Magic/Products/Singles/Modern-Horizons/Snow-Covered-Island', 
+            'Fabled Passage': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Fabled-Passage', 
+            'Once Upon a Time': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Once-Upon-a-Time', 
+            'Murderous Rider // Swift End': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Murderous-Rider-Swift-End', 
+            'Questing Beast': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Questing-Beast', 
+            'Oko, Thief of Crowns': 'https://www.cardmarket.com/en/Magic/Products/Singles/Throne-of-Eldraine/Oko-Thief-of-Crowns'
     }
     
     for card_name in card_names_urls:  
@@ -321,10 +396,12 @@ def main(engine, debug=False, debug_hard=False):
         url = card_names_urls[card_name]
         html = load_page(url, card_name, debug=debug)
         info, table = get_soup(html)
-        row_tags = table.find_all('div', class_='row no-gutters article-row')
-        df = get_data(row_tags, card_name, now)
+        df = get_data(info, table, card_name, now, debug_hard=debug_hard)
         
         print('inserting records of card %s with shape %s at %s'%(card_name, str(df.shape), str(now)))
+        print('head: ')
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+            print(df.head(1))
         
         df.to_sql('card_listings', con=engine, if_exists='append', index=False)
         
@@ -333,28 +410,31 @@ def main(engine, debug=False, debug_hard=False):
             print(card_names_urls[card_name])
             print(df.shape)
             print(df.dtypes)
+            
         if debug_hard == True:
-            with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+            with pd.option_context('display.max_rows', None, 'display.max_columns', 20):  # more options can be specified also
                 display(df)
         
 if __name__ == '__main__':
+    print('-----------------------------------------------------------------------------')
+    start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
     try: 
-        start = pd.Timestamp.now(tz='UTC') #Timestamp('2019-10-09 15:09:44.173350+0000')    
         engine = get_db_connection()
         
-        main(engine, debug=False)
+        main(engine, debug=False, debug_hard=False)
         
+        
+    finally:
+        engine.dispose()
         end = pd.Timestamp.now(tz='UTC')
         print('start: %s'%(start,))
         print('end: %s'%(end,))
         print('duration: %s'%(end - start,))
-    finally:
-        engine.dispose()
-    
+    print('-----------------------------------------------------------------------------')
 
 
-# In[8]:
+# In[ ]:
 
 
-get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
+#get_ipython().system('jupyter nbconvert --to script prototype_scraping.ipynb')
 

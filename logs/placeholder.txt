@@ -1,0 +1,1 @@
+this file exists just so the logs folder doesnt get removed by git

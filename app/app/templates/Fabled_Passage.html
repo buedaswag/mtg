@@ -1,0 +1,121 @@
+{% extends "base_layout.html" %} {% block title %}Welcome{% endblock %} 
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('serveStaticResource', resource='css/timeline.css') }}">
+    <link rel="stylesheet" href="{{ url_for('serveStaticResource', resource='css/morris.css') }}">
+{% endblock %} 
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Fabled Passage</h1>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="chart-container-price_distribution_lastest_time_stamp" style="height:100%;">
+                    <!-- Include fusioncharts core library -->
+                    <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/fusioncharts.js"></script>
+                    <!-- Include fusion theme -->
+                    <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/themes/fusioncharts.theme.fusion.js"></script>
+                    <script type="text/javascript">
+                        var flask_data = JSON.parse('{{ data_price_distribution_lastest_time_stamp | tojson | safe}}');
+                        var dataSource = {
+                            chart: {
+                                caption: "Item Amount Distribution",
+                                subcaption: "From latest timestamp",
+                                xaxisname: "Price",
+                                yaxisname: "Amount",
+                                numbersuffix: " units",
+                                theme: "fusion"
+                            },
+                            data: flask_data
+                        };
+                        FusionCharts.ready(function() {
+                            var chart = new FusionCharts({
+                                type: 'column2d',
+                                renderAt: 'chart-container-price_distribution_lastest_time_stamp',
+                                width: '100%',//100% 700
+                                height: '700%',//300% 400
+                                dataFormat: 'json',
+                                dataSource
+                            });
+                            chart.render();
+                        });
+                    </script>
+                </div>
+            </div>
+            <!-- /.panel-body -->
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="chart-container-item_cheapest_price_item_amount" style="height:100%;">
+                    <!-- Include fusioncharts core library -->
+                    <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/fusioncharts.js"></script>
+                    <!-- Include fusion theme -->
+                    <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/themes/fusioncharts.theme.fusion.js"></script>
+                    <script type="text/javascript">
+                        var data = JSON.parse('{{ data_item_cheapest_price_item_amount | tojson | safe}}');
+                        var schema = JSON.parse('{{ schema_item_cheapest_price_item_amount | tojson | safe}}');
+                        var data_store = new FusionCharts.DataStore();
+                        var data_source = {
+                            chart: {
+                                multicanvas: false
+                            },
+                            caption: {
+                                text: "Item Cheapest Price and Card Stock"
+                            },
+                            yaxis: [
+                                {
+                                    plot: [
+                                        value="Item Cheapest Price",
+                                        connectnulldata=true,
+                                        type="line"
+                                    ],
+                                    format: {
+                                        suffix: " €"
+                                    },
+                                    min: "0"
+                                }, 
+                                {
+                                    plot: [
+                                        value="Stock Value",
+                                        connectnulldata=true,
+                                        type="line"
+                                    ],
+                                    format: {
+                                        suffix: " units"
+                                    },
+                                    min: "0"
+                                }
+                            ],
+                        };
+                        data_source.data = data_store.createDataTable(data, schema);
+                        FusionCharts.ready(function() {
+                            var chart = new FusionCharts({
+                                type: 'timeseries',
+                                renderAt: 'chart-container-item_cheapest_price_item_amount',
+                                width: '100%',//100% 700
+                                height: '700%',//300% 400
+                                dataFormat: 'json',
+                                dataSource: data_source,
+                            });
+                            chart.render();
+                        });
+                    </script>
+                </div>
+            </div>
+            <!-- /.panel-body -->
+        </div>
+        <!-- /.panel -->
+    </div>
+</div>
+<!-- /.row -->{% endblock %}
