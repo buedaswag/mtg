@@ -25,6 +25,7 @@ sudo /etc/mod_wsgi-express-80/apachectl stop<br />
 <br />chgrp www-data ~/mtg/app/
 <br />chmod g+rwx ~/mtg/app/
 <br /> - also check if any imports are failing
+<br /> - make sure the paths written in python strings are correct
 
 # postgres notes
 psql [database_name] [user_name]<br />
